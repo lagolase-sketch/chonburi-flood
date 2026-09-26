@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เลี่ยงถนนน้ำท่วม ชลบุรี - เช็กเส้นทางน้ำท่วมและจุดปิดการจราจร</title>
+<meta name="description" content="รายงานสถานการณ์เส้นทางน้ำท่วมขัง จุดผ่านไม่ได้ และทางเลี่ยงในจังหวัดชลบุรี อัปเดตล่าสุด">
+
+<!-- Open Graph / Facebook / LINE Preview Tags -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lagolase-sketch.github.io/chonburi-flood/">
+<meta property="og:title" content="เลี่ยงถนนน้ำท่วม ชลบุรี - เช็กเส้นทางก่อนเดินทาง">
+<meta property="og:description" content="เช็กด่วน! รายงานจุดน้ำท่วมขัง เส้นทางที่ปิดการจราจร และแผนที่นำทางเลี่ยงในจังหวัดชลบุรี">
+<meta property="og:image" content="https://images.unsplash.com/photo-1547683905-f686c993aae5?q=80&w=1200&auto=format&fit=crop">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card Tags -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="เลี่ยงถนนน้ำท่วม ชลบุรี">
+<meta name="twitter:description" content="รายงานสถานการณ์เส้นทางน้ำท่วมและจุดเลี่ยงในจังหวัดชลบุรี">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1547683905-f686c993aae5?q=80&w=1200&auto=format&fit=crop">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI","Noto Sans Thai",sans-serif;background:#f5f7fa;color:#1a2332;line-height:1.6}
+.wrap{max-width:820px;margin:0 auto;padding:16px}
+.meta{font-size:14px;color:#5a6b7d;margin-bottom:6px}
+.meta b{color:#1a2332}
+h1{font-size:34px;font-weight:800;line-height:1.25;margin:8px 0 14px}
+h1 span{color:#c1121f}
+.intro{font-size:15px;color:#3d4d5c;margin-bottom:18px}
+.warn{background:#fff4e5;border-left:4px solid #f59e0b;padding:12px 14px;border-radius:8px;font-size:14px;margin-bottom:20px}
+.legend{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.lg{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;font-weight:700;font-size:15px}
+.bar{width:34px;height:8px;border-radius:4px;flex:none}
+.lg.d{background:#fde8ea;color:#7f1d1d}.lg.d .bar{background:#7f1d1d}
+.lg.r{background:#fde8ea;color:#dc2626}.lg.r .bar{background:#dc2626}
+.lg.o{background:#fff4e0;color:#d97706}.lg.o .bar{background:#f59e0b}
+.lg.g{background:#e6f5ec;color:#15803d}.lg.g .bar{background:#15803d}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}
+.stat{background:#fff;border:1px solid #e3e8ef;border-radius:14px;padding:16px}
+.stat .n{font-size:36px;font-weight:800;line-height:1}
+.stat .l{font-size:14px;color:#5a6b7d;margin-top:4px}
+.c-d{color:#7f1d1d}.c-r{color:#dc2626}.c-o{color:#d97706}.c-g{color:#15803d}
+.card{background:#fff;border:1px solid #e3e8ef;border-radius:14px;padding:16px;margin-bottom:16px}
+.card h2{font-size:19px;margin-bottom:4px}
+.card .sub{font-size:14px;color:#5a6b7d;margin-bottom:12px}
+.mapbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.mbtn{padding:8px 16px;border:1px solid #d5dce5;background:#fff;border-radius:99px;font-size:14px;font-family:inherit;cursor:pointer;color:#1a2332}
+.mbtn.on{background:#1a2332;color:#fff;border-color:#1a2332;font-weight:600}
+#map{height:400px;border-radius:10px;border:1px solid #e3e8ef;background:#e8eef4}
+.note{font-size:13px;color:#5a6b7d;margin-top:10px}
+#q{width:100%;padding:14px 16px;border:1px solid #d5dce5;border-radius:12px;font-size:16px;font-family:inherit;background:#fff}
+#q:focus{outline:2px solid #1a2332;border-color:transparent}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:14px 0 18px;-webkit-overflow-scrolling:touch}
+.chip{padding:10px 22px;border:1px solid #d5dce5;background:#fff;border-radius:99px;font-size:15px;font-family:inherit;cursor:pointer;white-space:nowrap;color:#1a2332}
+.chip.on{background:#1a2332;color:#fff;border-color:#1a2332;font-weight:600}
+.hd{font-size:22px;font-weight:800;margin:6px 0 14px}
+.hd small{font-size:15px;font-weight:400;color:#5a6b7d}
+.item{background:#fff;border:1px solid #e3e8ef;border-left-width:6px;border-radius:12px;padding:16px;margin-bottom:12px}
+.item.d{border-left-color:#7f1d1d}.item.r{border-left-color:#dc2626}.item.o{border-left-color:#f59e0b}
+.ih{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.num{width:32px;height:32px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:none}
+.num.d{background:#7f1d1d}.num.r{background:#dc2626}.num.o{background:#f59e0b}
+.ih h3{font-size:18px;font-weight:700}
+.seg{font-size:14px;color:#3d4d5c;margin-bottom:8px}
+.box{padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:8px}
+.box.d{background:#fde8ea;color:#7f1d1d}.box.r{background:#fde8ea;color:#991b1b}.box.o{background:#fff4e0;color:#92400e}
+.ft{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.tag{padding:7px 14px;border-radius:8px;color:#fff;font-weight:700;font-size:14px}
+.tag.d{background:#7f1d1d}.tag.r{background:#dc2626}.tag.o{background:#f59e0b}
+.amp{font-size:13px;color:#5a6b7d}
+.ft a{color:#1d4ed8;text-decoration:none;font-size:14px;font-weight:600}
+.empty{text-align:center;padding:40px;color:#5a6b7d}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:9px 10px;border-bottom:1px solid #eef1f5;text-align:left}
+th{background:#f5f7fa;font-weight:700}
+.hot{display:flex;flex-wrap:wrap;gap:10px}
+.hot a{flex:1 1 140px;background:#1a2332;color:#fff;text-decoration:none;padding:14px;border-radius:12px;text-align:center;font-weight:700}
+.hot a small{display:block;font-weight:400;font-size:12px;opacity:.75}
+footer{text-align:center;font-size:13px;color:#8a97a6;padding:24px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meta">ข้อมูลจากกรมทางหลวง · ทางหลวงชนบท · ปภ. และรายงานภาคสนาม</div>
+  <div class="meta">ค่าเวลา <b>18:20 น.</b> · เสาร์ 26 ก.ย. 2569</div>
+  <h1>เลี่ยง <span id="cnt">12</span> เส้นทางนี้ ในชลบุรี</h1>
+  <p class="intro">เส้นทางเหล่านี้มีรายงานน้ำท่วมขังจากหน่วยงานราชการ สีของแต่ละเส้นดูจากระดับน้ำสูงสุดที่รายงานบนเส้นทางนั้น ควรใช้เส้นทางอื่นหากทำได้</p>
+  <div class="warn">⚠️ ชลบุรีไม่มีเซ็นเซอร์วัดระดับน้ำถนนแบบเรียลไทม์เหมือน กทม. ข้อมูลชุดนี้มาจากรายงานหน่วยงานและข่าวภาคสนาม กรุณาตรวจสอบซ้ำก่อนเดินทาง</div>
+
+  <div class="legend">
+    <div class="lg d"><i class="bar"></i>แดงเข้ม = ผ่านไม่ได้ / น้ำสูงเกิน 50 ซม.</div>
+    <div class="lg r"><i class="bar"></i>แดง = รถเล็กห้ามผ่าน 30–50 ซม.</div>
+    <div class="lg o"><i class="bar"></i>ส้ม = ท่วมขังเล็กน้อย 10–30 ซม.</div>
+    <div class="lg g"><i class="bar"></i>เขียว = ระดับน้ำปกติ</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="n c-d">4</div><div class="l">ผ่านไม่ได้</div></div>
+    <div class="stat"><div class="n c-r">5</div><div class="l">น้ำท่วมสูง</div></div>
+    <div class="stat"><div class="n c-o">3</div><div class="l">ท่วมขังเล็กน้อย</div></div>
+    <div class="stat"><div class="n c-g">6</div><div class="l">อำเภอเฝ้าระวัง</div></div>
+  </div>
+
+  <div class="card">
+    <h2>แผนที่เส้นทางที่มีน้ำท่วมขัง</h2>
+    <div class="sub">แตะหมุดเพื่อดูรายละเอียด · สลับมุมมองได้ที่ปุ่มด้านล่าง</div>
+    <div class="mapbar" id="mapbar"></div>
+    <div id="map"></div>
+    <p class="note">หมุดสีคือจุดที่มีรายงานน้ำท่วม ตำแหน่งเป็นค่าโดยประมาณตามช่วง กม. ที่หน่วยงานรายงาน · แผนที่ฐาน © CARTO · Esri · OpenStreetMap contributors</p>
+  </div>
+
+  <input id="q" type="text" placeholder="พิมพ์ชื่อถนนหรืออำเภอ เช่น ศรีราชา, ทล.331">
+  <div class="chips" id="chips"></div>
+
+  <div class="hd">น้ำท่วม · หลีกเลี่ยง <small id="shown"></small></div>
+  <div id="list"></div>
+
+  <div class="card">
+    <h2>ทางหลวงชนบทที่ได้รับผลกระทบ</h2>
+    <table>
+      <tr><th>สายทาง</th><th>ช่วง กม.</th><th>อำเภอ</th></tr>
+      <tr><td>ชบ.4017</td><td>11+500 – 36+220</td><td>บ่อทอง</td></tr>
+      <tr><td>ชบ.4084</td><td>5+200 – 5+300, 17+975 – 18+025</td><td>บ่อทอง</td></tr>
+      <tr><td>ชบ.4090</td><td>4+800 – 4+850</td><td>บ่อทอง</td></tr>
+      <tr><td>ชบ.5202</td><td>0+625 – 0+725</td><td>บ่อทอง</td></tr>
+      <tr><td>ชบ.5200</td><td>5+750 – 5+850</td><td>บ่อทอง</td></tr>
+      <tr><td>ชบ.5054</td><td>0+000 – 0+025</td><td>บ่อทอง</td></tr>
+      <tr><td>ชบ.4064</td><td>7+300 – 7+400</td><td>ศรีราชา</td></tr>
+      <tr><td>ชบ.4004</td><td>9+000 – 9+600</td><td>พนัสนิคม / บ้านบึง</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>พื้นที่เฝ้าระวัง 26–30 ก.ย. 2569</h2>
+    <div class="sub">ประกาศ สทนช. ฉบับที่ 6/2569 — เฝ้าระวังน้ำท่วมฉับพลันและน้ำป่าไหลหลาก</div>
+    <p>อ.บ้านบึง · อ.พานทอง · อ.พนัสนิคม · อ.หนองใหญ่ · อ.บ่อทอง · อ.ศรีราชา</p>
+  </div>
+
+  <div class="card">
+    <h2>สายด่วนแจ้งเหตุ</h2>
+    <div class="hot" style="margin-top:10px">
+      <a href="tel:1586">1586<small>กรมทางหลวง</small></a>
+      <a href="tel:1146">1146<small>ทางหลวงชนบท</small></a>
+      <a href="tel:1784">1784<small>ปภ.</small></a>
+      <a href="tel:1669">1669<small>ฉุกเฉิน</small></a>
+    </div>
+  </div>
+
+  <footer>อัปเดตล่าสุด 26 ก.ย. 2569 18:20 น. · ข้อมูลอาจเปลี่ยนแปลงได้ตลอดเวลา</footer>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const DATA=[
+ {n:1,lv:"d",road:"ทล.344 (บ้านบึง–แกลง)",seg:"ช่วง กม.9+800 – 10+300",amp:"อ.บ้านบึง",zone:"เหนือ",lat:13.284,lng:101.183,
+  notes:[{t:"ปิดการจราจร · รถทุกชนิดผ่านไม่ได้",lv:"d"}],tag:"ผ่านไม่ได้",depth:"น้ำสูงเกิน 50 ซม."},
+ {n:2,lv:"d",road:"ทล.3241",seg:"ช่วง กม.4+100 – 4+300",amp:"อ.ศรีราชา",zone:"กลาง",lat:13.168,lng:101.005,
+  notes:[{t:"ปิดการจราจร · รถทุกชนิดผ่านไม่ได้",lv:"d"}],tag:"ผ่านไม่ได้",depth:"น้ำสูงเกิน 50 ซม."},
+ {n:3,lv:"d",road:"ทล.3701 (คู่ขนานมอเตอร์เวย์)",seg:"ช่วง กม.80+300 – 81+850",amp:"อ.เมืองชลบุรี",zone:"กลาง",lat:13.268,lng:100.972,
+  notes:[{t:"ปิดการจราจร · ใช้ทางเลี่ยงถนนสุขุมวิทแทน",lv:"d"}],tag:"ผ่านไม่ได้",depth:"น้ำสูงเกิน 50 ซม."},
+ {n:4,lv:"d",road:"มอเตอร์เวย์ M7 (กรุงเทพฯ–มาบตาพุด)",seg:"กม.81+900 บ้านหนองข่า · ผ่านไม่ได้ทั้งขาเข้าและขาออก",amp:"อ.ศรีราชา",zone:"กลาง",lat:13.252,lng:100.994,
+  notes:[{t:"ขาเข้า: ออกที่ต่างระดับหนองขาม แล้วกลับเข้า M7 ที่ต่างระดับบางพระ หรือบ้านบึง",lv:"d"},{t:"ขาออก: ออกที่ต่างระดับบ้านบึง",lv:"d"}],tag:"ผ่านไม่ได้",depth:"น้ำสูงเกิน 50 ซม."},
+ {n:5,lv:"r",road:"ทล.331 (มาบเอียง–แหลมฉบัง)",seg:"ช่วงสะพานลอยนิคมปิ่นทอง 1 – ใต้ต่างระดับหนองขาม",amp:"อ.ศรีราชา",zone:"กลาง",lat:13.112,lng:101.022,
+  notes:[{t:"รถเล็กและจักรยานยนต์ห้ามผ่านเด็ดขาด เสี่ยงเครื่องยนต์ดับ",lv:"r"}],tag:"น้ำท่วมสูง",depth:"30–50 ซม."},
+ {n:6,lv:"r",road:"ถ.สุขุมวิท ช่วงสัตหีบ",seg:"จากแยกสัตหีบ ถึง แยก กม.1 · ระยะทาง ~1 กม.",amp:"อ.สัตหีบ",zone:"ใต้",lat:12.662,lng:100.901,
+  notes:[{t:"มีรถเครื่องยนต์ดับกลางถนนหลายคัน",lv:"r"}],tag:"น้ำท่วมสูง",depth:"30–50 ซม."},
+ {n:7,lv:"d",road:"ต.หนองขาม (ถนนในหมู่บ้าน)",seg:"หมู่บ้านลลิลพร็อพเพอร์ตี้ · หมู่บ้านกลางนา",amp:"อ.ศรีราชา",zone:"กลาง",lat:13.124,lng:101.003,
+  notes:[{t:"ระดับน้ำบางจุดสูงกว่า 1 เมตร ใช้เรือท้องแบนอพยพ",lv:"d"},{t:"อพยพเข้าศูนย์พักพิงแล้ว 81 ราย",lv:"d"}],tag:"ผ่านไม่ได้",depth:"เกิน 100 ซม."},
+ {n:8,lv:"r",road:"ถนนสายรองเขตเทศบาลเมืองชลบุรี",seg:"หลายสายในเขตเทศบาล",amp:"อ.เมืองชลบุรี",zone:"กลาง",lat:13.361,lng:100.985,
+  notes:[{t:"ระดับน้ำ 50–80 ซม. รถเล็กผ่านไม่ได้",lv:"r"}],tag:"น้ำท่วมสูง",depth:"50–80 ซม."},
+ {n:9,lv:"r",road:"ถนนสายรองเขตพนัสนิคม",seg:"พื้นที่ลุ่มริมคลองหลวง",amp:"อ.พนัสนิคม",zone:"เหนือ",lat:13.453,lng:101.182,
+  notes:[{t:"ระดับน้ำ 40–60 ซม. เฝ้าระวังน้ำล้นตลิ่ง",lv:"r"}],tag:"น้ำท่วมสูง",depth:"40–60 ซม."},
+ {n:10,lv:"o",road:"ถ.สุขุมวิท ช่วงบางละมุง",seg:"บริเวณแยกโรงโป๊ะ – พัทยาเหนือ",amp:"อ.บางละมุง",zone:"ใต้",lat:12.968,lng:100.909,
+  notes:[{t:"ท่วมขังผิวจราจร รถใหญ่ผ่านได้ ชะลอความเร็ว",lv:"o"}],tag:"ท่วมขังเล็กน้อย",depth:"10–30 ซม."},
+ {n:11,lv:"o",road:"ถนนเทศบาลบ่อทอง",seg:"บริเวณตลาดบ่อทอง",amp:"อ.บ่อทอง",zone:"เหนือ",lat:13.350,lng:101.440,
+  notes:[{t:"น้ำป่าไหลหลากจากเขา ระดับลดลงแล้ว เฝ้าระวังฝนรอบใหม่",lv:"o"}],tag:"ท่วมขังเล็กน้อย",depth:"10–30 ซม."},
+ {n:12,lv:"o",road:"ถนนสายพานทอง–หนองตำลึง",seg:"ช่วงผ่านนิคมอุตสาหกรรมอมตะซิตี้",amp:"อ.พานทอง",zone:"เหนือ",lat:13.470,lng:101.070,
+  notes:[{t:"ท่วมขังเป็นช่วง รถเล็กผ่านได้แต่ต้องระวัง",lv:"o"}],tag:"ท่วมขังเล็กน้อย",depth:"10–30 ซม."}
+];
+const ZONES=["ทุกโซน","โซนเหนือ","โซนกลาง","โซนใต้"];
+let zone="ทุกโซน",kw="";
+const COLOR={d:"#7f1d1d",r:"#dc2626",o:"#f59e0b"};
+
+const chips=document.getElementById("chips");
+ZONES.forEach((z,i)=>{
+  const b=document.createElement("button");
+  b.className="chip"+(i===0?" on":"");
+  b.textContent=z;
+  b.onclick=()=>{zone=z;[...chips.children].forEach(c=>c.classList.remove("on"));b.classList.add("on");render();};
+  chips.appendChild(b);
+});
+document.getElementById("q").oninput=e=>{kw=e.target.value.trim();render();};
+
+const map=L.map("map").setView([13.20,101.05],9);
+
+const BASES={
+  "แผนที่ถนน": L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    {maxZoom:19,subdomains:"abcd",attribution:'© CARTO · © OpenStreetMap contributors'}),
+  "ดาวเทียม": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {maxZoom:19,attribution:"Tiles © Esri · Maxar · Earthstar Geographics"}),
+  "ขาวมินิมอล": L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    {maxZoom:19,subdomains:"abcd",attribution:'© CARTO · © OpenStreetMap contributors'})
+};
+
+const SATLABEL = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+  {maxZoom:19,opacity:0.9}
+);
+
+let current = BASES["แผนที่ถนน"].addTo(map);
+let currentName = "แผนที่ถนน";
+
+const mapbar=document.getElementById("mapbar");
+Object.keys(BASES).forEach((name,i)=>{
+  const b=document.createElement("button");
+  b.className="mbtn"+(i===0?" on":"");
+  b.textContent=name;
+  b.onclick=()=>{
+    if(name===currentName) return;
+    map.removeLayer(current);
+    if(map.hasLayer(SATLABEL)) map.removeLayer(SATLABEL);
+    current=BASES[name].addTo(map);
+    currentName=name;
+    if(name==="ดาวเทียม") SATLABEL.addTo(map);
+    current.bringToBack();
+    [...mapbar.children].forEach(c=>c.classList.remove("on"));
+    b.classList.add("on");
+  };
+  mapbar.appendChild(b);
+});
+
+let switched=false;
+BASES["แผนที่ถนน"].on("tileerror",()=>{
+  if(switched||currentName!=="แผนที่ถนน") return;
+  switched=true;
+  map.removeLayer(current);
+  current=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+    {maxZoom:19,attribution:"Tiles © Esri"}).addTo(map);
+  current.bringToBack();
+});
+
+const layer=L.layerGroup().addTo(map);
+
+function filtered(){
+  return DATA.filter(d=>{
+    const okZ = zone==="ทุกโซน" || ("โซน"+d.zone)===zone;
+    const okK = !kw || (d.road+d.amp+d.seg).includes(kw);
+    return okZ && okK;
+  });
+}
+
+function render(){
+ const arr=filtered();
+ document.getElementById("cnt").textContent=arr.length;
+ document.getElementById("shown").textContent=arr.length+" เส้น";
+ const list=document.getElementById("list");
+ list.innerHTML = arr.length ? arr.map(d=>`
+  <div class="item ${d.lv}">
+    <div class="ih"><div class="num ${d.lv}">${d.n}</div><h3>${d.road}</h3></div>
+    <div class="seg">ช่วงน้ำท่วม: ${d.seg}</div>
+    ${d.notes.map(o=>`<div class="box ${o.lv}">${o.t}</div>`).join("")}
+    <div class="ft">
+      <span class="tag ${d.lv}">${d.tag}</span>
+      <span class="amp">${d.depth} · ${d.amp}</span>
+      <a href="https://www.google.com/maps/search/?api=1&query=${d.lat},${d.lng}" target="_blank" rel="noopener">ดูตำแหน่ง ↗</a>
+    </div>
+  </div>`).join("") : `<div class="empty">ไม่พบเส้นทางที่ตรงกับคำค้นหา</div>`;
+
+ layer.clearLayers();
+ arr.forEach(d=>{
+  L.circleMarker([d.lat,d.lng],{radius:11,color:"#fff",weight:2,fillColor:COLOR[d.lv],fillOpacity:1})
+   .bindPopup(`<b>${d.n}. ${d.road}</b><br>${d.seg}<br><b style="color:${COLOR[d.lv]}">${d.tag}</b> · ${d.depth}<br>${d.amp}`)
+   .addTo(layer);
+ });
+}
+render();
+setTimeout(()=>map.invalidateSize(),300);
+</script>
+</body>
+</html>
