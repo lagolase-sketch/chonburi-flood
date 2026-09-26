@@ -197,14 +197,16 @@ document.getElementById("q").oninput=e=>{kw=e.target.value.trim();render();};
 
 const map=L.map("map").setView([13.20,101.05],9);
 
-const BASES={
-  "แผนที่ถนน": L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-    {maxZoom:19,subdomains:"abcd",attribution:'© CARTO · © OpenStreetMap contributors'}),
-  "ดาวเทียม": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    {maxZoom:19,attribution:"Tiles © Esri · Maxar · Earthstar Geographics"}),
-  "ขาวมินิมอล": L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-    {maxZoom:19,subdomains:"abcd",attribution:'© CARTO · © OpenStreetMap contributors'})
-};
+     const BASES={
+       "แผนที่ถนน": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+         {maxZoom:19,attribution:"Tiles © Esri · OpenStreetMap contributors"}),
+       "ดาวเทียม": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+         {maxZoom:19,attribution:"Tiles © Esri · Maxar · Earthstar Geographics"}),
+       "ภูมิประเทศ": L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+         {maxZoom:19,attribution:'© OpenStreetMap contributors, HOT'}).on('tileerror', function(e) {
+           this.setUrl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}");
+         })
+     };
 
 const SATLABEL = L.tileLayer(
   "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
