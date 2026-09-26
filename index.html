@@ -86,7 +86,7 @@ footer{text-align:center;font-size:13px;color:#8a97a6;padding:24px 0}
 <body>
 <div class="wrap">
   <div class="meta">ข้อมูลจากกรมทางหลวง · ทางหลวงชนบท · ปภ. และรายงานภาคสนาม</div>
-  <div class="meta">ค่าเวลา <b>18:20 น.</b> · เสาร์ 26 ก.ย. 2569</div>
+  <div class="meta">อัปเดตล่าสุดเวลา <b id="updatetime">18:20</b> น. · เสาร์ 26 ก.ย. 2569</div>
   <h1>เลี่ยง <span id="cnt">12</span> เส้นทางนี้ ในชลบุรี</h1>
   <p class="intro">เส้นทางเหล่านี้มีรายงานน้ำท่วมขังจากหน่วยงานราชการ สีของแต่ละเส้นดูจากระดับน้ำสูงสุดที่รายงานบนเส้นทางนั้น ควรใช้เส้นทางอื่นหากทำได้</p>
   <div class="warn">⚠️ ชลบุรีไม่มีเซ็นเซอร์วัดระดับน้ำถนนแบบเรียลไทม์เหมือน กทม. ข้อมูลชุดนี้มาจากรายงานหน่วยงานและข่าวภาคสนาม กรุณาตรวจสอบซ้ำก่อนเดินทาง</div>
@@ -110,7 +110,7 @@ footer{text-align:center;font-size:13px;color:#8a97a6;padding:24px 0}
     <div class="sub">แตะหมุดเพื่อดูรายละเอียด · สลับมุมมองได้ที่ปุ่มด้านล่าง</div>
     <div class="mapbar" id="mapbar"></div>
     <div id="map"></div>
-    <p class="note">หมุดสีคือจุดที่มีรายงานน้ำท่วม ตำแหน่งเป็นค่าโดยประมาณตามช่วง กม. ที่หน่วยงานรายงาน · แผนที่ฐาน © CARTO · Esri · OpenStreetMap contributors</p>
+    <p class="note">หมุดสีคือจุดที่มีรายงานน้ำท่วม ตำแหน่งเป็นค่าโดยประมาณตามช่วง กม. ที่หน่วยงานรายงาน · แผนที่ฐาน © Esri · OpenStreetMap contributors</p>
   </div>
 
   <input id="q" type="text" placeholder="พิมพ์ชื่อถนนหรืออำเภอ เช่น ศรีราชา, ทล.331">
@@ -150,11 +150,19 @@ footer{text-align:center;font-size:13px;color:#8a97a6;padding:24px 0}
     </div>
   </div>
 
-  <footer>อัปเดตล่าสุด 26 ก.ย. 2569 18:20 น. · ข้อมูลอาจเปลี่ยนแปลงได้ตลอดเวลา</footer>
+  <footer id="footer-time">อัปเดตล่าสุด 26 ก.ย. 2569 เวลา 18:20 น. · ข้อมูลอาจเปลี่ยนแปลงได้ตลอดเวลา</footer>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// แปลงเวลาให้แสดงผลเป็นแบบ 24 ชั่วโมงอัตโนมัติ (เช่น 08:30 หรือ 18:20)
+const now = new Date();
+const hours = String(now.getHours()).padStart(2, '0');
+const minutes = String(now.getMinutes()).padStart(2, '0');
+const timeString = `${hours}:${minutes}`;
+document.getElementById("updatetime").textContent = timeString;
+document.getElementById("footer-time").innerHTML = `อัปเดตล่าสุด 26 ก.ย. 2569 เวลา ${timeString} น. · ข้อมูลอาจเปลี่ยนแปลงได้ตลอดเวลา`;
+
 const DATA=[
  {n:1,lv:"d",road:"ทล.344 (บ้านบึง–แกลง)",seg:"ช่วง กม.9+800 – 10+300",amp:"อ.บ้านบึง",zone:"เหนือ",lat:13.284,lng:101.183,
   notes:[{t:"ปิดการจราจร · รถทุกชนิดผ่านไม่ได้",lv:"d"}],tag:"ผ่านไม่ได้",depth:"น้ำสูงเกิน 50 ซม."},
@@ -197,21 +205,16 @@ document.getElementById("q").oninput=e=>{kw=e.target.value.trim();render();};
 
 const map=L.map("map").setView([13.20,101.05],9);
 
-     const BASES={
-       "แผนที่ถนน": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-         {maxZoom:19,attribution:"Tiles © Esri · OpenStreetMap contributors"}),
-       "ดาวเทียม": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-         {maxZoom:19,attribution:"Tiles © Esri · Maxar · Earthstar Geographics"}),
-       "ภูมิประเทศ": L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-         {maxZoom:19,attribution:'© OpenStreetMap contributors, HOT'}).on('tileerror', function(e) {
-           this.setUrl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}");
-         })
-     };
-
-const SATLABEL = L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-  {maxZoom:19,opacity:0.9}
-);
+const BASES={
+  "แผนที่ถนน": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+    {maxZoom:19,attribution:"Tiles © Esri · OpenStreetMap contributors"}),
+  "ดาวเทียม": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {maxZoom:19,attribution:"Tiles © Esri · Maxar · Earthstar Geographics"}),
+  "ภูมิประเทศ": L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+    {maxZoom:19,attribution:'© OpenStreetMap contributors, HOT'}).on('tileerror', function(e) {
+      this.setUrl("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}");
+    })
+};
 
 let current = BASES["แผนที่ถนน"].addTo(map);
 let currentName = "แผนที่ถนน";
@@ -224,25 +227,13 @@ Object.keys(BASES).forEach((name,i)=>{
   b.onclick=()=>{
     if(name===currentName) return;
     map.removeLayer(current);
-    if(map.hasLayer(SATLABEL)) map.removeLayer(SATLABEL);
     current=BASES[name].addTo(map);
     currentName=name;
-    if(name==="ดาวเทียม") SATLABEL.addTo(map);
     current.bringToBack();
     [...mapbar.children].forEach(c=>c.classList.remove("on"));
     b.classList.add("on");
   };
   mapbar.appendChild(b);
-});
-
-let switched=false;
-BASES["แผนที่ถนน"].on("tileerror",()=>{
-  if(switched||currentName!=="แผนที่ถนน") return;
-  switched=true;
-  map.removeLayer(current);
-  current=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-    {maxZoom:19,attribution:"Tiles © Esri"}).addTo(map);
-  current.bringToBack();
 });
 
 const layer=L.layerGroup().addTo(map);
